@@ -6,7 +6,6 @@ __pycache__/
 *.h5
 
 *.csv
-*.keras
 
 dataset/
 
