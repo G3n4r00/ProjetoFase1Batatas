@@ -30,7 +30,7 @@ for nome_imagem in os.listdir(pasta_teste):
     imagem = cv2.cvtColor(imagem, cv2.COLOR_BGR2RGB) 
     imagem_resized = cv2.resize(imagem, (224, 224))
     
-    # Formatação (Sem o preprocess_input manual, pois agora está no modelo)
+    # Formatação
     imagem_array = np.expand_dims(imagem_resized, axis=0)
 
     # Predição

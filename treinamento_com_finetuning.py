@@ -56,7 +56,7 @@ model.compile(optimizer=Adam(learning_rate=0.001),
               loss='sparse_categorical_crossentropy', 
               metrics=['accuracy'])
 
-# 5 épocas são suficientes apenas para a nova camada não bagunçar a rede base
+
 model.fit(train_dataset, validation_data=validation_dataset, epochs=5)
 
 # ---------------------------------------------------------
