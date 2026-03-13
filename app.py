@@ -6,14 +6,13 @@ from tensorflow.keras.models import load_model
 # 1. Configurações da Página Web
 st.set_page_config(page_title="Inspeção de Batatas Utilizando Visão Computacional", page_icon="🥔", layout="centered")
 
-st.title("🥔 Classificador de Batatas por IA")
+st.title("Classificador de Batatas por IA")
 st.write("Faça o upload de uma foto para o sistema identificar se a batata está saudável ou doente.")
 st.markdown("---")
 
 # 2. Carregar o Modelo (O cache evita que o modelo seja recarregado a cada clique)
 @st.cache_resource
 def carregar_modelo():
-    # Certifique-se de que o nome do arquivo bate com o modelo que você treinou
     return load_model('modelo_batatas_finetuned.keras')
 
 try:
@@ -30,7 +29,6 @@ if uploaded_file is not None:
     # Ler e exibir a imagem na tela
     image = Image.open(uploaded_file).convert('RGB')
     
-    # Criar duas colunas para o layout ficar mais bonito
     col1, col2 = st.columns(2)
     
     with col1:

@@ -60,7 +60,7 @@ model.compile(optimizer=Adam(learning_rate=0.001),
 model.fit(train_dataset, validation_data=validation_dataset, epochs=5)
 
 # ---------------------------------------------------------
-# FASE 2: Fine-Tuning (A mágica acontece aqui)
+# FASE 2: Fine-Tuning
 # ---------------------------------------------------------
 print("\n--- INICIANDO FASE 2: FINE-TUNING ---")
 base_model.trainable = True
@@ -70,8 +70,6 @@ base_model.trainable = True
 for layer in base_model.layers[:100]:
     layer.trainable = False
 
-# IMPORTANTE: Ao fazer Fine-Tuning, o learning_rate deve ser muito menor
-# (ex: 0.0001 em vez de 0.001) para não destruir os pesos pré-existentes.
 model.compile(optimizer=Adam(learning_rate=0.0001), 
               loss='sparse_categorical_crossentropy', 
               metrics=['accuracy'])
@@ -83,7 +81,7 @@ reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.5, patience=1, min_lr
 history_fine = model.fit(
     train_dataset, 
     validation_data=validation_dataset, 
-    epochs=15, # Podemos colocar mais épocas agora, pois ele vai parar sozinho se piorar
+    epochs=15, # Para sozinho se começar a piorar
     callbacks=[early_stop, reduce_lr]
 )
 

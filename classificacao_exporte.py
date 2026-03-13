@@ -8,7 +8,7 @@ from tkinter import Tk, filedialog
 
 
 # 1. Configurações
-modelo_path = 'modelo_batatas_finetuned.keras' # Apontando para o novo formato
+modelo_path = 'modelo_batatas_finetuned.keras'
 pasta_teste = 'imagens_teste'
 arquivo_csv_padrao = 'relatorio_inspecao_batatas_v2.csv'
 class_names = ['Doente', 'Saudavel'] 
