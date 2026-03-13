@@ -19,7 +19,7 @@ O projeto consiste em três componentes principais:
 
 ## Pré-requisitos
 
-- Python 3.8 ou superior
+- Python 3.12
 - TensorFlow 2.x
 - Streamlit
 - OpenCV
