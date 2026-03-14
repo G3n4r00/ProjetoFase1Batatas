@@ -1,150 +1,182 @@
 # Projeto de Inspeção de Batatas com Visão Computacional
 
-Este projeto utiliza inteligência artificial e visão computacional para classificar batatas como "Saudáveis" ou "Doentes" com base em imagens. O sistema é construído usando TensorFlow/Keras com o modelo MobileNetV2 pré-treinado, incorporando técnicas de data augmentation e fine-tuning para melhorar a precisão.
+Este projeto utiliza inteligência artificial e visão computacional para classificar batatas como **"Saudáveis"** ou **"Doentes"** com base em imagens. Ele é construído com TensorFlow/Keras usando transfer learning (MobileNetV2 pré-treinado) e inclui: treinamento com fine-tuning, classificação em lote com exportação CSV e uma interface web simples em Streamlit.
 
-## Funcionamento Geral
+---
 
-O projeto consiste em três componentes principais:
+## ✅ Estrutura Atual do Projeto
 
-1. **Treinamento do Modelo**: Scripts para treinar um modelo de classificação de imagens usando transfer learning com MobileNetV2.
-2. **Classificação em Lote**: Script para processar múltiplas imagens e gerar relatórios em CSV.
-3. **Aplicação Web**: Interface Streamlit para upload e classificação individual de imagens com geração de relatórios CSV.
+- `treinamento_com_finetuning.py`: treina o modelo (transfer learning + fine-tuning) e salva `modelo_batatas_finetuned.keras`
+- `classificacao_exporte.py`: classifica imagens em `imagens_teste/` e exporta relatório CSV (usa `tkinter` para escolher destino)
+- `app.py`: interface web Streamlit para classificar uma imagem por vez
+- `modelo_batatas_finetuned.keras`: modelo treinado existente (pode ser substituído ao treinar novamente)
+- `dataset/`: (não comitado) pasta com imagens de treino divididas em classes
+- `imagens_teste/`: (não comitado) pasta com imagens para classificação em lote
+- `old/`: histórico de modelos e relatórios antigos
 
-### Arquitetura do Modelo
+---
 
-- **Base**: MobileNetV2 pré-treinado no ImageNet
-- **Pré-processamento**: Redimensionamento para 224x224, data augmentation (flip, rotation, zoom), normalização
-- **Camadas Finais**: Global Average Pooling, Dropout, Dense (128 unidades), Dense (2 unidades com softmax)
-- **Técnicas**: Transfer learning com fine-tuning opcional
+## 🧰 Requisitos / Dependências
 
-## Pré-requisitos
-
+### Requisitos mínimos
 - Python 3.12
-- TensorFlow 2.x
-- Streamlit
-- OpenCV
-- Pillow (PIL)
-- NumPy
-- Pandas (para manipulação de dados no app web)
 
-## Instalação
-
-1. Clone ou baixe este repositório.
-2. Instale as dependências:
+### Dependências Python
 
 ```bash
-pip install tensorflow streamlit opencv-python pillow numpy pandas
+pip install tensorflow streamlit opencv-python pillow numpy
 ```
 
-3. Certifique-se de que os arquivos de modelo estão presentes (modelo_batatas_finetuned.keras ou similar).
+> ⚠️ O script `classificacao_exporte.py` usa `tkinter` (incluído no Python padrão em Windows/macOS/Linux). Em ambientes headless (servidores sem GUI) ele não funcionará.
 
-## Preparação do Dataset
+---
 
-Como as imagens não são incluídas no repositório, você deve preparar seu próprio dataset:
+## 🧠 Como Treinar o Modelo (Fine-Tuning)
 
-1. **Crie a estrutura de pastas**:
-   ```
-   dataset/
-   ├── Doente/     # Coloque aqui imagens de batatas doentes
-   └── Saudavel/   # Coloque aqui imagens de batatas saudáveis
-   ```
-
-2. **Para testes**: Crie uma pasta `imagens_teste/` com imagens adicionais para classificação em lote.
-
-Foi utilizado o dataset público: https://www.kaggle.com/datasets/muhammad0subhan/fruit-and-vegetable-disease-healthy-vs-rotten
-
-## Estrutura do Projeto
-
-```
-ProjetoFase1Batatas/
-├── app.py                          # Aplicação web Streamlit
-├── treinamento_com_finetuning.py   # Script de treinamento com fine-tuning
-├── classificacao_exporte.py        # Classificação em lote e exportação CSV
-├── modelo_batatas_finetuned.keras  # Modelo treinado com fine-tuning
-├── dataset/                        # [CRIAR] Dados de treinamento (não incluído)
-│   ├── Doente/                     # [CRIAR] Imagens de batatas doentes
-│   └── Saudavel/                   # [CRIAR] Imagens de batatas saudáveis
-├── imagens_teste/                  # [CRIAR] Imagens para teste/classificação
-└── .gitignore                      # Arquivos a ignorar no Git
-```
-
-## Como Usar
-
-### 1. Treinamento do Modelo
-
-#### Treinamento com Fine-Tuning
-
-Execute o script `treinamento_com_finetuning.py`:
+1. Prepare o dataset conforme a seção **Dataset** abaixo.
+2. Execute:
 
 ```bash
 python treinamento_com_finetuning.py
 ```
 
-Este script:
-- **Fase 1**: Treina apenas as camadas finais por 5 épocas
-- **Fase 2**: Descongela as últimas camadas do MobileNetV2 e faz fine-tuning por até 15 épocas
-- Usa callbacks para early stopping e redução de learning rate
-- Salva o modelo como `modelo_batatas_finetuned.keras`
+O fluxo do script:
+- **Fase 1**: treina apenas as camadas finais (cabeça) por 5 épocas
+- **Fase 2**: descongela parte do MobileNetV2 para fine-tuning (até 15 épocas) com callbacks de `EarlyStopping` e `ReduceLROnPlateau`
+- O modelo final é salvo como `modelo_batatas_finetuned.keras`
 
-### 2. Classificação em Lote
+---
 
-Para classificar múltiplas imagens e gerar um relatório:
+## 🗂️ Classificação em Lote (Relatório CSV)
+
+Para classificar todas as imagens na pasta `imagens_teste/` e gerar um relatório:
 
 ```bash
 python classificacao_exporte.py
 ```
 
-Este script:
-- Processa todas as imagens na pasta `imagens_teste/`
-- Classifica cada imagem usando o modelo `modelo_batatas_finetuned.keras`
-- **Abre uma janela para o usuário escolher onde salvar o relatório CSV**
-- Gera um relatório CSV com ID da imagem, status e grau de confiança
+O que o script faz:
+- Carrega `modelo_batatas_finetuned.keras`
+- Lê todas as imagens em `imagens_teste/` (jpg/jpeg/png)
+- Classifica cada imagem e gera um relatório com:
+  - **ID_Imagem** (nome do arquivo)
+  - **Status_Inspecao** (Doente/Saudavel)
+  - **Grau_de_Confianca_Pct**
+- Pede para você escolher onde salvar o arquivo CSV (interface gráfica via `tkinter`)
+- O CSV usa `;` como separador
 
-### 3. Aplicação Web
+---
 
-Para usar a interface web interativa:
+## 🖥️ Aplicação Web (Streamlit)
+
+Para rodar a interface web:
 
 ```bash
 streamlit run app.py
 ```
 
-A aplicação permite:
-- Upload de uma imagem (JPG, JPEG, PNG)
+O app oferece:
+- Upload de imagem (JPG/JPEG/PNG)
 - Exibição da imagem carregada
-- Processamento e diagnóstico (Saudável/Doente)
-- Exibição do grau de confiança com barra de progresso
-- **Acumulação de múltiplas inspeções em um relatório**
-- **Geração e download de relatório CSV** com todos os resultados
+- Classificação em tempo real (Doente / Saudável)
+- Exibição do grau de confiança em % com barra de progresso
 
-## Dataset
+> Observação: o app não gera relatório CSV, apenas mostra o resultado na tela.
 
-O dataset deve estar organizado na pasta `dataset/` com duas subpastas:
-- `Doente/`: Imagens de batatas doentes
-- `Saudavel/`: Imagens de batatas saudáveis
+---
 
-## Resultados e Métricas
+## 🧩 Dataset (Organização)
 
-Baseado nos relatórios gerados, o modelo alcança altos níveis de confiança:
-- Batatas saudáveis: Geralmente >90% de confiança
-- Batatas doentes: Geralmente >95% de confiança
-- Alguns casos de baixa confiança indicam necessidade de mais dados de treinamento
+Crie a estrutura abaixo para treinar o modelo (não incluído no repositório):
 
-## Personalização
+```
+dataset/
+├── Doente/     # imagens de batatas doentes
+└── Saudavel/   # imagens de batatas saudáveis
+```
 
-### Modificar Classes
-Para adicionar mais classes (ex: "Podre", "Machucada"), edite:
-- As pastas no `dataset/`
-- O número de unidades na última camada Dense (de 2 para N classes)
-- A lista `class_names` nos scripts
+Para testes de classificação em lote, coloque imagens em:
 
-### Ajustar Hiperparâmetros
-- **Épocas**: Modifique em `model.fit()`
-- **Learning Rate**: Ajuste no `Adam()`
-- **Data Augmentation**: Adicione/remova camadas em `data_augmentation`
+```
+imagens_teste/
+```
 
-### Usar Outro Modelo Base
-Substitua `MobileNetV2` por outros modelos como `ResNet50`, `VGG16`, etc.
+---
 
-## Time
+## 🧪 Classes e Nomes Usados
 
-Para dúvidas ou sugestões, entre em contato com o desenvolvedor do projeto.
+O projeto utiliza estas classes (mapeadas pelo índice de saída do modelo):
+
+- `Doente`
+- `Saudavel`
+
+### Se quiser adicionar classes
+- Edite as pastas em `dataset/`
+- Altere a última camada Dense: `Dense(2, activation='softmax')` → `Dense(N, activation='softmax')`
+- Atualize a lista `class_names` nos scripts para refletir as novas classes
+
+---
+
+## 🔧 Ajustes / Personalizações comuns
+
+### Ajustar hiperparâmetros
+- **Épocas**: modifique `epochs` em `model.fit()` (ambos os blocos)
+- **Learning rate**: altere `Adam(learning_rate=...)`
+- **Data augmentation**: edite a sequência em `data_augmentation` (flip/rotation/zoom)
+
+### Trocar o backbone do modelo
+Substitua `MobileNetV2` por outro modelo (ResNet50, EfficientNet, etc.) e ajuste pré-processamento conforme necessário.
+
+---
+
+## 🗂️ Estrutura Recomendada (Resumo)
+
+```
+ProjetoFase1Batatas/
+├── app.py
+├── treinamento_com_finetuning.py
+├── classificacao_exporte.py
+├── modelo_batatas_finetuned.keras
+├── dataset/         # Não comitado (contém dados de treino)
+└── imagens_teste/   # Não comitado (contém imagens para relatório)
+
+```
+
+---
+
+## 👥 Contato
+
+### Time
+
+<table>
+  <tr>
+    <th>Nome</th>
+    <th>RM</th>
+    <th>Turma</th>
+  </tr>
+  <tr>
+    <td>Gabriel Genaro Dalaqua</td>
+    <td>551986</td>
+    <td>4ESOA</td>
+  </tr>
+  <tr>
+    <td>Alairton Rocha Scabelli </td>
+    <td>551454</td>
+    <td>4ESOA</td>
+  </tr>
+  <tr>
+    <td>Carolina Nascimento Amorim</td>
+    <td>97930</td>
+    <td>4ESOA</td>
+  </tr>
+  <tr>
+    <td>Eduardo Marins</td>
+    <td>551892</td>
+    <td>4ESOA</td>
+  </tr>
+  <tr>
+    <td>Sarah Ribeiro da Silva</td>
+    <td>97747</td>
+    <td>4ESOA</td>
+  </tr>
+</table>
