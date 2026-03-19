@@ -129,6 +129,10 @@ Substitua `MobileNetV2` por outro modelo (ResNet50, EfficientNet, etc.) e ajuste
 
 ---
 
+## Dataset Kaggle
+
+https://www.kaggle.com/datasets/muhammad0subhan/fruit-and-vegetable-disease-healthy-vs-rotten
+
 ## 🗂️ Estrutura Recomendada (Resumo)
 
 ```
